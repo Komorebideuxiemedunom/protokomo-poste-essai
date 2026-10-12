@@ -1,0 +1,14 @@
+{
+ "id": "pk-essai000002",
+ "etat": "travail",
+ "activite": [
+  "Le poste de travail est prêt"
+ ],
+ "reponse": "",
+ "erreur": null,
+ "apercu": null,
+ "apercuErreur": null,
+ "commit": null,
+ "limites": null,
+ "maj": "2026-10-12T09:53:14.302Z"
+}
