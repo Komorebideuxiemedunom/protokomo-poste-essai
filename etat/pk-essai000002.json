@@ -1,14 +1,14 @@
 {
  "id": "pk-essai000002",
- "etat": "travail",
+ "etat": "erreur",
  "activite": [
   "Le poste de travail est prêt"
  ],
  "reponse": "",
- "erreur": null,
+ "erreur": "Le jeton GitHub du poste (secret PROTOKOMO_GITHUB_TOKEN) est manquant. Refaites l’installation du poste dans ProtoKomo.",
  "apercu": null,
  "apercuErreur": null,
  "commit": null,
  "limites": null,
- "maj": "2026-10-12T09:53:14.302Z"
+ "maj": "2026-10-12T09:53:15.298Z"
 }
