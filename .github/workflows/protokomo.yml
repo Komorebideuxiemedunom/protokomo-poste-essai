@@ -1,0 +1,81 @@
+# ProtoKomo · poste de travail
+# Installé et déclenché par l'application iPhone ProtoKomo. Fait tourner Claude Code (binaire officiel,
+# non modifié) avec VOTRE abonnement Claude sur vos sites. Voir README.md de ce dépôt.
+name: ProtoKomo
+run-name: "ProtoKomo ${{ inputs.request_id }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: Dépôt du site (propriétaire/nom)
+        required: true
+      request_id:
+        description: Identifiant de la demande
+        required: true
+      mode:
+        description: demande, annuler, maj ou apercu
+        required: true
+        default: demande
+      prompt:
+        description: Demande à Claude
+        required: false
+        default: ""
+      nouvelle:
+        description: Nouvelle conversation
+        required: false
+        default: "false"
+
+# Une demande à la fois par site, dans l'ordre.
+concurrency:
+  group: protokomo-${{ inputs.site }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  travail:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Scripts du poste
+        uses: actions/checkout@v4
+        with:
+          path: poste
+          sparse-checkout: protokomo
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Conversation précédente
+        id: memoire
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.claude/projects
+          key: claude-${{ inputs.site }}-${{ github.run_id }}
+          restore-keys: claude-${{ inputs.site }}-
+
+      - name: Claude Code
+        run: npm install --global --no-audit --no-fund @anthropic-ai/claude-code
+
+      - name: Demande
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          PROTOKOMO_GITHUB_TOKEN: ${{ secrets.PROTOKOMO_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PK_SITE: ${{ inputs.site }}
+          PK_REQUEST_ID: ${{ inputs.request_id }}
+          PK_MODE: ${{ inputs.mode }}
+          PK_PROMPT: ${{ inputs.prompt }}
+          PK_NOUVELLE: ${{ inputs.nouvelle }}
+        run: node poste/protokomo/run.mjs
+
+      - name: Mémoriser la conversation
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.claude/projects
+          key: claude-${{ inputs.site }}-${{ github.run_id }}
